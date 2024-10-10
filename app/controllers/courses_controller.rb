@@ -7,6 +7,7 @@ class CoursesController < ApplicationController
       def create
         course = current_user.taught_courses.build(course_params)
         if course.save
+          
           render json: course, status: :created
         else
           render json: course.errors, status: :unprocessable_entity

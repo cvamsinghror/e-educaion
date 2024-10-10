@@ -38,6 +38,10 @@ gem "bootsnap", require: false
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ]
+
+ 
+  gem 'dotenv-rails'
+
 end
 
 group :development do
@@ -48,13 +52,14 @@ end
 gem 'jwt'
 gem 'bcrypt'
 gem 'noticed'
+gem 'mailgun-ruby', '~>1.2.14'
 
 
 group :development do
-  gem 'letter_opener'
+  gem 'letter_opener'     
 end
 
+gem 'kaminari'
 
-gem 'mailgun-ruby'
 
 

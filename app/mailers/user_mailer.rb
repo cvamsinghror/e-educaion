@@ -1,14 +1,26 @@
 class UserMailer < ApplicationMailer
-    default from: 'no-reply@yourapp.com'
+  require 'mailgun-ruby'
 
-    def welcome_email(user)
-      @user = user
-      mail(
-        to: @user.email,
-        subject: 'Welcome to Our App!',
-        body: "Hello, #{@user.email}! \n\nThank you for signing up at our platform. You can log in at http://yourapp.com/login. \n\nBest regards,\nThe Team",
-        content_type: 'text/plain'
-      )
-    end
+  def welcome_email(user)
+    @user = user
+    send_simple_message(user.email)
   end
 
+  private
+
+  def send_simple_message(_to_email)
+    mg_client = Mailgun::Client.new(ENV['MAILGUN_API_KEY'])
+    
+    domain = ENV['MAILGUN_DOMAIN']
+
+    message_params = {
+      from: "Excited User <mailgun@#{domain}>",
+      to: 'jiromi1617@abevw.com',
+      subject: 'Welcome to educationalApp!',
+      text: 'Thank you for signing up!'
+    }
+
+    mg_client.send_message(domain, message_params)
+  end
+
+end

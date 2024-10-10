@@ -3,9 +3,20 @@ class UsersController < ApplicationController
     before_action :set_user, only: [:show, :destroy]
 
     def index
-        @users = User.all
-        render json: @users, status: :ok
-    end
+        @users = User.page(params[:page]).per(10)
+        
+        render json: {
+          users: @users,
+          meta: {
+            total_pages: @users.total_pages,
+            current_page: @users.current_page,
+            next_page: @users.next_page,
+            prev_page: @users.prev_page,
+            total_count: @users.total_count
+          }
+        }
+      end
+    
 
     def show
         render json: @user, status: :ok
@@ -14,15 +25,13 @@ class UsersController < ApplicationController
     def create 
         @user = User.new(user_params)
         if @user.save
-            
-            UserMailer.welcome_email(@user).deliver_later
-            render json: { message: 'User created successfully, welcome email sent.' }, status: :created
+          SendWelcomeEmailJob.set(wait: 1.minute).perform_later(@user.id)
+          token = jwt_encode(user_id: @user.id)
+          render json: { message: 'User created successfully, welcome email sent.', token: token }, status: :created
         else
-            render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
-           
+          render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
         end
-    end
-
+      end
 
         def update
             unless @user.update(user_params)
@@ -36,8 +45,9 @@ class UsersController < ApplicationController
         end
 
         private
+
         def user_params
-            params.permit(:name, :username, :email, :password)
+            params.require(:user).permit(:name, :username, :email, :password)
         end
 
         def set_user
